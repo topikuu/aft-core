@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 #
-# Copyright (c) 2013-14 Intel, Inc.
+# Copyright (c) 2013, 2014, 2015 Intel, Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
@@ -25,7 +25,7 @@ DATA_TEST_DATA_PATH = os.path.join(DATA_CFG_PATH, "test_data")
 DATA_DOCS_PATH = os.path.join(DATA_CFG_PATH, "docs")
 
 setup(name=PROJECT_NAME,
-      version="0.1.0",
+      version="0.1.1",
       description="Automated Flasher and Tester for OS SW images",
       author="Igor Stoppa",
       author_email="igor.stoppa@intel.com",

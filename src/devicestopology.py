@@ -156,7 +156,7 @@ class DevicesTopology(object):
                         cls._lockfile = \
                             os.fdopen(os.open(
                                 os.path.join(cls._LOCK_ROOT,
-                                             "/aft_" + device.dev_id),
+                                             "aft_" + device.dev_id),
                                 os.O_WRONLY | os.O_CREAT, 0660), "w")
                         os.umask(old_mask)
                         fcntl.flock(cls._lockfile,
