@@ -1,3 +1,6 @@
+* Mon Feb 02 2015 Igor Stoppa <igor.stoppa@intel.com> 0.1.2
+- Convert to use entry points
+
 * Thu Jan 22 2015 Igor Stoppa <igor.stoppa@intel.com> 0.1.1
 - Fix path for lockfile.
 

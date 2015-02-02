@@ -14,7 +14,7 @@
 
 Name:       %{projectname}-core
 Summary:    Automated Flasher and Tester for OS SW images
-Version:    0.1.1
+Version:    0.1.2
 Release:    1
 Group:      Development/Tools
 License:    GPL-2.0+
@@ -52,5 +52,6 @@ rm -rf %{buildroot}
 %{python_sitelib}/%{projectname}-%{version}-*.egg-info
 %{python_sitelib}/%{projectname}
 %{_datadir}/%{projectname}
+%{_bindir}/%{projectname}
 
 %changelog

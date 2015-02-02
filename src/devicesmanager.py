@@ -1,4 +1,4 @@
-# Copyright (c) 2013-14 Intel, Inc.
+# Copyright (c) 2013, 2014, 2015 Intel, Inc.
 # Author igor.stoppa@intel.com
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -17,7 +17,6 @@ from argparse import ArgumentParser
 from ConfigParser import SafeConfigParser
 import re
 import os
-import sys
 from aft.classloader import ClassLoader
 from aft.tester import Tester
 
@@ -231,8 +230,3 @@ class DevicesManager(object):
             logging.critical("Failure.")
         return result is False
 # pylint: enable=too-few-public-methods
-
-if __name__ == "__main__":
-    DevicesManager()
-    logging.basicConfig(filename='aft.log', level=logging.DEBUG)
-    sys.exit(DevicesManager.run())
