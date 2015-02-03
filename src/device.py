@@ -81,11 +81,11 @@ class Device(object):
         Deploys a file from the local filesystem to the device (remote).
         """
 
-    @abc.abstractmethod
-    def pull(self, remote_file, local_file, user="root"):
-        """
-        Fetches a file from the device (remote) to the local filesystem.
-        """
+#    @abc.abstractmethod
+#    def pull(self, remote_file, local_file, user="root"):
+#        """
+#        Fetches a file from the device (remote) to the local filesystem.
+#        """
 
     def __eq__(self, comp):
         return self.dev_id == comp.dev_id
