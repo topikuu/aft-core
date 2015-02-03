@@ -20,18 +20,18 @@ import logging
 from aft.devicesmanager import DevicesManager
 
 
-def main(args=None):
+def main(argv=None):
     """
     Entry point for library-like use.
     """
-    if args is not None:
-        backup_args = sys.args
-        sys.args = args
-    DevicesManager()
     logging.basicConfig(filename='aft.log', level=logging.DEBUG)
+    if argv is not None:
+        backup_argv = sys.argv
+        sys.argv = argv
+    DevicesManager()
     retval = DevicesManager.run()
-    if backup_args in locals():
-        sys.args = backup_args
+    if "backup_argv" in locals():
+        sys.argv = backup_argv
     return retval
 
 

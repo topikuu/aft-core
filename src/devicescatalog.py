@@ -84,12 +84,13 @@ class DevicesCatalog(list):
         """
         Returns the first matching catalog entry.
         """
-        if "regex" not in key:
-            sys.exit("Searching devices catalog by unsupported key: {0}"
-                     .format(key))
-        for item in self[:]:
-            if re.match(item[key], "".join(value), re.DOTALL):
-                return item
+        if "regex" in key:
+            for item in self[:]:
+                if re.match(item[key], "".join(value), re.DOTALL):
+                    return item
+        else:
+            loging.critical("Searching devices catalog by unsupported key:"
+                            " {0}".format(key))
         return None
 
     def _get_model_and_type(self, key, value):

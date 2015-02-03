@@ -50,6 +50,10 @@ class DevicesTopology(object):
         """
         Initializer for class variables.
         """
+        logging.debug("Initializing Topology:\n" +
+                      "\tdevice class: {0}\n".format(device_class) +
+                      "\tcutter class: {0}\n".format(cutter_class) +
+                      "\ttopology file: {0}\n".format(topology_file_name))
         cls._device_class = device_class
         cls._cutter_class = cutter_class
         cls._topology_file_name = topology_file_name
@@ -65,7 +69,10 @@ class DevicesTopology(object):
         config = ConfigParser.ConfigParser()
         cls._devices = []
         try:
+            logging.debug("Loading topology file: {0}".
+                          format(cls._topology_file_name))
             config.read(cls._topology_file_name)
+            logging.debug("Topology file loaded.")
             for section in config.sections():
                 name = section
                 model = config.get(section, "model")
@@ -73,12 +80,25 @@ class DevicesTopology(object):
                 cutter_id = config.get(section, "cutter")
                 cutter_ch = config.get(section, "channel")
                 assert name and model and dev_id and cutter_id
+                logging.debug("Topology file is formally correct.")
+                logging.debug("Acquiring cutter id: {0}   -   ch: {1}.".
+                               format(cutter_id, cutter_ch))
                 channel = \
                     cls._cutter_class.get_channel_by_id_and_cutter_id(
                         cutter_id, cutter_ch)
-                cls._devices.append(cls._device_class(name=name, model=model,
-                                                      dev_id=dev_id,
-                                                      channel=channel))
+                logging.debug("Channel acquired: {0}".format(channel))
+                logging.debug("Creating device class:\n" +
+                              "\tname: {0}\n".format(name) +
+                              "\tmodel: {0}\n".format(model) +
+                              "\tdev_id: {0}\n".format(dev_id) +
+                              "\tchannel: {0}".format(channel))
+                device_class = cls._device_class(name=name, model=model,
+                                                 dev_id=dev_id,
+                                                 channel=channel)
+                logging.debug("Device Class created as: {0}".
+                              format(device_class))
+                cls._devices.append(device_class)
+            logging.debug("Devices: {0}".format(cls._devices))
             return True
         except (OSError, ConfigParser.ParsingError) as error:
             logging.critical("Error while loading config file {0}\n {1}"

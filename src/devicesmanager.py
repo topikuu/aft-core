@@ -81,6 +81,7 @@ class DevicesManager(object):
 
                 platform = parms["platform"]
                 name = platform + cls.__TOPOLOGY_CLASS_NAME_ENDING
+                logging.debug("Topology name: {0}".format(name))
                 cls._topology_class = ClassLoader.load_plugin(class_name=name)
                 name = platform + cls.__DEVICE_CLASS_NAME_ENDING
                 cls._device_class = ClassLoader.load_plugin(class_name=name)
@@ -135,9 +136,23 @@ class DevicesManager(object):
         Loads the topology descriptor and verifies if the image
         is supported for testing.
         """
-        return cls._success and \
-            cls._topology_class.load() and \
-            cls._topology_class.identify_model_and_type(cls._file_name)
+        if cls._success is False:
+            logging.debug("Success already compromised:"
+                          " not testing for image supported.")
+            return False
+        logging.debug("Loading topology classs: {0}".
+                       format(cls._topology_class))
+        if cls._topology_class.load() is False:
+            logging.critical("Failed to load topology class.")
+            cls._success = False
+            return False
+        logging.debug("Identifying device model and type.")
+        if cls._topology_class.identify_model_and_type(cls._file_name)\
+           is False:
+            logging.critical("Failed to identify model and type.")
+            cls._success = False
+            return False
+        return True
 
     @classmethod
     def _reserve(cls):
@@ -182,23 +197,40 @@ class DevicesManager(object):
         Performs all the initializations preceding the writing of the image
         and testing steps.
         """
-        cls._success = \
-            cls._load_config() and \
-            Tester.init(test_plan=cls._test_plan) and \
-            cls._device_class.init_class(init_data=cls._device_init_data) and \
-            cls._topology_class.init(
-                topology_file_name=cls._topology_file_name,
-                catalog_file_name=cls._catalog_file_name,
-                cutter_class=cls._cutter_class)
-        if not cls._success:
-            logging.critical("Error while loading configuration files.")
-        return cls._success
+        cls._success = False
+        logging.debug("Loading configuration file.")
+        if cls._load_config() is False:
+            logging.critical("Failed to load config file.")
+            return False
+        logging.debug("Loading test plan.")
+        if Tester.init(test_plan=cls._test_plan) is False:
+            logging.critical("Failed to load test plan file.")
+            return False
+        logging.debug("Initializing device class.")
+        if cls._device_class.init_class(init_data=cls._device_init_data)\
+           is False:
+            logging.critical("Failed to initialize device class.")
+            return False
+        logging.debug("Initializing topology class.")
+        if cls._topology_class.init(
+            topology_file_name=cls._topology_file_name,
+            catalog_file_name=cls._catalog_file_name,
+            cutter_class=cls._cutter_class) is False:
+            logging.critical("Failed to initialize topology class.")
+            return False
+        cls._success = True
+        return True
 
     @classmethod
     def run(cls):
         """
         Parse arguments and act accordingly.
         """
+        E_NO_IMAGE_NAME = 1
+        E_CONFIG_FILES  = 2
+        E_UNTESTABLE = 3
+        E_TEST_FAILED = 4
+        logging.debug("Building argument parser.")
         parser = ArgumentParser()
         parser.add_argument("--testable", action="store_true",
                             default=False,
@@ -210,23 +242,45 @@ class DevicesManager(object):
         parser.add_argument("file_name", action="store",
                             help="Image to write: a local file, "
                                  "compatible with the supported platforms.")
+        logging.debug("Parsing arguments.")
         args = parser.parse_args()
         if not hasattr(args, "file_name"):
             logging.critical("Error parsing arguments: missing image name")
-            return -1
+            return -E_NO_IMAGE_NAME
 # pylint: disable=protected-access
         cls._file_name = args.file_name
+        logging.debug("SW Image file {0}.".format(cls._file_name))
         cls._cfg_file_name = args.cfg
-        result = cls._load_configuration_files() and \
-            cls._image_is_supported() and \
-            (args.testable or cls._validate())
+        logging.debug("Configuration file {0}.".format(cls._cfg_file_name))
+        logging.debug("Loading configuration files.")
+        result = cls._load_configuration_files()
+        if result is False:
+            logging.debug("Error while loading configuration files.")
+            return -E_CONFIG_FILES
+        logging.debug("Checking if the image is supported.")
+        result = cls._image_is_supported()
+        if result is False:
+            logging.debug("Image is not supported.")
+        else:
+            logging.debug("Image is supported.")
+        if args.testable is True:
+            logging.debug("Only testability required, execution terminated.")
+            if result is True:
+                return 0
+            else:
+                return -E_UNTESTABLE
+        logging.debug("Validating SW Image.")
+        result = cls._validate()
+        if result is True:
+            logging.info("Validation Succesful.")
+        else:
+            logging.critical("Validation Failed.")
 # pylint: enable=protected-access
         if cls._topology_class is not None and \
                 cls._topology_class.reserved_device is not None:
             cls._topology_class.reserved_device.detach()
         if result is True:
-            logging.info("Done.")
+            return 0
         else:
-            logging.critical("Failure.")
-        return result is False
+            return -E_TEST_FAILED
 # pylint: enable=too-few-public-methods
