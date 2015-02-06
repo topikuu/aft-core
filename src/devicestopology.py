@@ -74,26 +74,18 @@ class DevicesTopology(object):
             config.read(cls._topology_file_name)
             logging.debug("Topology file loaded.")
             for section in config.sections():
-                name = section
-                model = config.get(section, "model")
-                dev_id = config.get(section, "id")
-                cutter_id = config.get(section, "cutter")
-                cutter_ch = config.get(section, "channel")
-                assert name and model and dev_id and cutter_id
-                logging.debug("Topology file is formally correct.")
-                logging.debug("Acquiring cutter id: {0}   -   ch: {1}.".
-                               format(cutter_id, cutter_ch))
+                device_descriptor = dict(config.items(section))
+                device_descriptor["name"] = section
+                logging.debug("Processing device descriptor: {0}".
+                              format(device_descriptor))
+                logging.debug("Acquiring cutter.")
                 channel = \
                     cls._cutter_class.get_channel_by_id_and_cutter_id(
-                        cutter_id, cutter_ch)
+                        device_descriptor["cutter"],
+                        device_descriptor["channel"])
                 logging.debug("Channel acquired: {0}".format(channel))
-                logging.debug("Creating device class:\n" +
-                              "\tname: {0}\n".format(name) +
-                              "\tmodel: {0}\n".format(model) +
-                              "\tdev_id: {0}\n".format(dev_id) +
-                              "\tchannel: {0}".format(channel))
-                device_class = cls._device_class(name=name, model=model,
-                                                 dev_id=dev_id,
+                device_class = cls._device_class(device_descriptor=
+                                                 device_descriptor,
                                                  channel=channel)
                 logging.debug("Device Class created as: {0}".
                               format(device_class))

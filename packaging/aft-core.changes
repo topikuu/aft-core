@@ -1,3 +1,7 @@
+* Fri Feb 06 2015 Igor Stoppa <igor.stoppa@intel.com> 0.1.5
+- Pass to device class all the parameters from the topology
+  descriptor.
+
 * Fri Feb 06 2015 Igor Stoppa <igor.stoppa@intel.com> 0.1.4
 - Add timestamp to logging.
 

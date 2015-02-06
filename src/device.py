@@ -27,10 +27,10 @@ class Device(object):
     """
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, model, dev_id, channel, name):
-        self.name = name
-        self.model = model
-        self.dev_id = dev_id
+    def __init__(self, device_descriptor, channel):
+        self.name = device_descriptor["name"]
+        self.model = device_descriptor["model"]
+        self.dev_id = device_descriptor["dev_id"]
         self.channel = channel
 
     @abc.abstractmethod
