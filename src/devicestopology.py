@@ -76,6 +76,10 @@ class DevicesTopology(object):
             for section in config.sections():
                 device_descriptor = dict(config.items(section))
                 device_descriptor["name"] = section
+                for item in cls._devices_catalog:
+                    if item["device_model"] == device_descriptor["model"]:
+                        device_descriptor["catalog_entry"] = item
+                        break
                 logging.debug("Processing device descriptor: {0}".
                               format(device_descriptor))
                 logging.debug("Acquiring cutter.")
