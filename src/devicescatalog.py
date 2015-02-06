@@ -1,4 +1,4 @@
-# Copyright (c) 2013-14 Intel, Inc.
+# Copyright (c) 2013, 2014, 2015 Intel, Inc.
 # Author igor.stoppa@intel.com
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -21,39 +21,6 @@ import ConfigParser
 
 VERSION = "0.1.0"
 
-
-class CatalogItem(dict):
-    """
-    Individual entry in the catalog.
-    """
-    @staticmethod
-    def _validate_key(key):
-        """"
-        Ensures that the key is valid.
-        """
-        if key not in ["device_model", "device_type",
-                       "device_regex", "file_name_regex"]:
-            sys.exit("Unsupported field in CatalogItem: {0}."
-                     .format(key))
-
-    @staticmethod
-    def _validate_val(val):
-        """"
-        Ensures that the value is not missing.
-        """
-        if not (isinstance(val, basestring) and val):
-            sys.exit("Invalid value in CatalogItem: {0}."
-                     .format(val))
-
-    def __getitem__(self, key):
-        self._validate_key(key)
-        return dict.__getitem__(self, key)
-
-    def __setitem__(self, key, val):
-        self._validate_key(key)
-        dict.__setitem__(self, key, val)
-
-
 class DevicesCatalog(list):
     """
     Loads and searches a catalog of devices.
@@ -67,12 +34,8 @@ class DevicesCatalog(list):
         try:
             config.read(file_name)
             for section in config.sections():
-                item = CatalogItem()
+                item = dict(config.items(section))
                 item["device_model"] = section
-                item["device_type"] = config.get(section, "device_type")
-                item["device_regex"] = config.get(section, "device_regex")
-                item["file_name_regex"] = config.get(section,
-                                                     "file_name_regex")
                 self.append(item)
         except ConfigParser.ParsingError as error:
             logging.critical("Error while loading catalog file {0}\n {1}"
