@@ -30,7 +30,7 @@ class Device(object):
     def __init__(self, device_descriptor, channel):
         self.name = device_descriptor["name"]
         self.model = device_descriptor["model"]
-        self.dev_id = device_descriptor["dev_id"]
+        self.dev_id = device_descriptor["id"]
         self.channel = channel
 
     @abc.abstractmethod

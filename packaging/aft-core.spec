@@ -14,7 +14,7 @@
 
 Name:       %{projectname}-core
 Summary:    Automated Flasher and Tester for OS SW images
-Version:    0.1.5
+Version:    0.1.6
 Release:    1
 Group:      Development/Tools
 License:    GPL-2.0
