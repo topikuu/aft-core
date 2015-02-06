@@ -24,7 +24,9 @@ def main(argv=None):
     """
     Entry point for library-like use.
     """
-    logging.basicConfig(filename='aft.log', level=logging.DEBUG)
+    logging.basicConfig(filename='aft.log', level=logging.DEBUG,
+                        format='%(asctime)s - %(name)s - '
+                               '%(levelname)s - %(message)s')
     if argv is not None:
         backup_argv = sys.argv
         sys.argv = argv
