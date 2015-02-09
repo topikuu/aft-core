@@ -32,6 +32,7 @@ class Device(object):
         self.model = device_descriptor["model"]
         self.dev_id = device_descriptor["id"]
         self.channel = channel
+        self.catalog_entry = device_descriptor["catalog_entry"]
 
     @abc.abstractmethod
     def is_in_test_mode(self):
