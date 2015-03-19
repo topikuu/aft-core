@@ -71,7 +71,7 @@ class Device(object):
         return self.channel.connect()
 
     @abc.abstractmethod
-    def execute(self, command, timeout, user="root"):
+    def execute(self, command, timeout, user="root", verbose=False):
         """
         Runs a command on the device and returns log and errorlevel.
         """

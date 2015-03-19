@@ -63,14 +63,15 @@ class CmdLineTool(object):
             return False
 
     @classmethod
-    def _run(cls, parms=(), timeout=-1):
+    def _run(cls, parms=(), timeout=-1, verbose=False):
         """
         Runs the command in a separate thread, with timeout.
         """
         result_q = multiprocessing.Queue()
         result = False
         process = multiprocessing.Process(target=_runner,
-                                          args=[cls.command, parms, result_q])
+                                          args=[cls.command, parms,
+                                                result_q, verbose])
         timeout = cls._timeout if timeout == -1 else timeout
         try:
             process.start()
@@ -88,14 +89,15 @@ class CmdLineTool(object):
         return result
 
 
-def _runner(command, parms, result_q):
+def _runner(command, parms, result_q, verbose=False):
     """
     Executes the command with the given parameters.
     It's meant to run from a thread with timeout.
     """
     try:
         command = (command,) + parms
-
+        if verbose:
+            logging.debug("{0}".format(command))
         process = subprocess.Popen(command,
                                    stderr=subprocess.STDOUT,
                                    stdout=subprocess.PIPE,)

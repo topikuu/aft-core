@@ -1,3 +1,6 @@
+* Thu Mar 19 2015 Igor Stoppa <igor.stoppa@intel.com> 0.2.0
+- Add verbose mode for individual commands.
+
 * Mon Feb 09 2015 Igor Stoppa <igor.stoppa@intel.com> 0.1.9
 - Store model info.
 
