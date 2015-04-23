@@ -1,3 +1,6 @@
+* Thu Apr 23 2015 Igor Stoppa <igor.stoppa@intel.com> 0.2.1
+- Catch case where no device type matches the image.
+
 * Thu Mar 19 2015 Igor Stoppa <igor.stoppa@intel.com> 0.2.0
 - Add verbose mode for individual commands.
 

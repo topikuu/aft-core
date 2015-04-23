@@ -115,6 +115,11 @@ class DevicesManager(object):
                     return False
                 logging.info("Configuration loaded.")
                 break
+            else:
+                logging.critical("Could not find a type of device "
+                                 "compatible with the image selected {0}"
+                                 .format(cls._file_name))
+                return False
         except KeyError as error:
             logging.critical("Missing configuration key from configuration "
                              "file:\n{0}".format(error))
