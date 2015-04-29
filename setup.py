@@ -25,7 +25,7 @@ DATA_TEST_DATA_PATH = os.path.join(DATA_CFG_PATH, "test_data")
 DATA_DOCS_PATH = os.path.join(DATA_CFG_PATH, "docs")
 
 setup(name=PROJECT_NAME,
-      version="0.2.1",
+      version="0.2.2",
       description="Automated Flasher and Tester for OS SW images",
       author="Igor Stoppa",
       author_email="igor.stoppa@intel.com",

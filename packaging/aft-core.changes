@@ -1,3 +1,6 @@
+* Wed Apr 29 2015 Igor Stoppa <igor.stoppa@intel.com> 0.2.2
+- Improve logging and debugging.
+
 * Thu Apr 23 2015 Igor Stoppa <igor.stoppa@intel.com> 0.2.1
 - Catch case where no device type matches the image.
 

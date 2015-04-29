@@ -64,6 +64,7 @@ class DevicesManager(object):
         containing the remaining parameters, which belonging
         to specific device types, for later processing.
         """
+        logging.debug("Loading configuration file.")
         try:
             config = SafeConfigParser()
             if [] == config.read(cls._cfg_file_name):
@@ -141,23 +142,17 @@ class DevicesManager(object):
         Loads the topology descriptor and verifies if the image
         is supported for testing.
         """
-        if cls._success is False:
+        if not cls._success:
             logging.debug("Success already compromised:"
                           " not testing for image supported.")
-            return False
-        logging.debug("Loading topology classs: {0}".
-                       format(cls._topology_class))
-        if cls._topology_class.load() is False:
+        elif not cls._topology_class.load():
             logging.critical("Failed to load topology class.")
-            cls._success = False
-            return False
-        logging.debug("Identifying device model and type.")
-        if cls._topology_class.identify_model_and_type(cls._file_name)\
-           is False:
+        elif not cls._topology_class.identify_model_and_type(cls._file_name):
             logging.critical("Failed to identify model and type.")
-            cls._success = False
-            return False
-        return True
+        else:
+            return True
+        cls._success = False
+        return False
 
     @classmethod
     def _reserve(cls):
@@ -173,9 +168,17 @@ class DevicesManager(object):
         """
         Writes the image to the reserved device.
         """
-        return cls._success and \
-            cls._topology_class.reserved_device and \
-            cls._topology_class.reserved_device.write_image(cls._file_name)
+        if not cls._success:
+            logging.critical("Success already compromised:"
+                             " not attempting to write image.")
+        elif not cls._topology_class.reserved_device:
+            logging.critical("No device was reserved: aborting image write.")
+        elif not cls._topology_class.reserved_device.write_image(cls._file_name):
+            logging.critical("Failed to write image.")
+        else:
+            return True
+        cls._success = False
+        return False
 
     @classmethod
     def _test(cls):
@@ -191,10 +194,19 @@ class DevicesManager(object):
         """
         Grabs a compatible device, writes to it the image and tests it.
         """
-        return cls._success and \
-            cls._reserve() and \
-            cls._write_image() and \
-            cls._test()
+        if not cls._success:
+            logging.critical("Success already compromised:"
+                             " not attempting to validate image.")
+        elif not cls._reserve():
+            logging.critical("Failed to reserve device.")
+        elif not cls._write_image():
+            logging.critical("Failed to write the test image to the device.")
+        elif not cls._test():
+            logging.critical("Failed to test the device.")
+        else:
+            return True
+        cls._success = False
+        return False
 
     @classmethod
     def _load_configuration_files(cls):
@@ -203,24 +215,22 @@ class DevicesManager(object):
         and testing steps.
         """
         cls._success = False
-        logging.debug("Loading configuration file.")
-        if cls._load_config() is False:
+        if not cls._load_config():
             logging.critical("Failed to load config file.")
             return False
         logging.debug("Loading test plan.")
-        if Tester.init(test_plan=cls._test_plan) is False:
+        if not Tester.init(test_plan=cls._test_plan):
             logging.critical("Failed to load test plan file.")
             return False
         logging.debug("Initializing device class.")
-        if cls._device_class.init_class(init_data=cls._device_init_data)\
-           is False:
+        if not cls._device_class.init_class(init_data=cls._device_init_data):
             logging.critical("Failed to initialize device class.")
             return False
         logging.debug("Initializing topology class.")
-        if cls._topology_class.init(
-            topology_file_name=cls._topology_file_name,
-            catalog_file_name=cls._catalog_file_name,
-            cutter_class=cls._cutter_class) is False:
+        if not cls._topology_class.init(
+               topology_file_name=cls._topology_file_name,
+               catalog_file_name=cls._catalog_file_name,
+               cutter_class=cls._cutter_class):
             logging.critical("Failed to initialize topology class.")
             return False
         cls._success = True
