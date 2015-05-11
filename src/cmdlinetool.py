@@ -1,4 +1,4 @@
-# Copyright (c) 2013-14 Intel, Inc.
+# Copyright (c) 2013, 2014, 2015 Intel, Inc.
 # Author igor.stoppa@intel.com
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -20,8 +20,11 @@ import logging
 import subprocess
 import multiprocessing
 
+from collections import namedtuple
+
 VERSION = "0.1.0"
 
+CmdResult = namedtuple("CmdResult", "returncode, stdoutdata, stderrdata")
 
 # pylint: disable=too-few-public-methods
 class CmdLineTool(object):
@@ -68,7 +71,7 @@ class CmdLineTool(object):
         Runs the command in a separate thread, with timeout.
         """
         result_q = multiprocessing.Queue()
-        result = False
+        result = None
         process = multiprocessing.Process(target=_runner,
                                           args=[cls.command, parms,
                                                 result_q, verbose])
@@ -84,7 +87,7 @@ class CmdLineTool(object):
         except multiprocessing.TimeoutError:
             logging.warn("Command timedout:"
                          "{0} {1}".format(cls.command, parms))
-        if cls._exit_on_error and result is False:
+        if cls._exit_on_error and result is None:
             sys.exit(-1)
         return result
 
@@ -102,15 +105,19 @@ def _runner(command, parms, result_q, verbose=False):
                                    stderr=subprocess.STDOUT,
                                    stdout=subprocess.PIPE,)
         stdoutdata, stderrdata = process.communicate()
-        if process.returncode != 0:
-            result_q.put(False)
+        result = CmdResult(returncode=process.returncode,
+                           stdoutdata=stdoutdata,
+                           stderrdata=stderrdata)
+        if result.returncode != 0:
             logging.debug("Error running:\n{0}\n".format(command) +
-                          "Returned error code {0} and error message\n{1}".
-                          format(process.returncode, stderrdata))
-        result_q.put(stdoutdata)
+                          "* returncode: {0}\n".format(result.returncode) +
+                          "* stdout: {0}\n".format(result.stdoutdata) +
+                          "* stderr: {0}\n".format(result.stderrdata))
     except OSError as error:
+        result = CmdResult(returncode=error.errno, stdoutdata="",
+                           stderrdata=error.strerror)
         logging.debug("OSError running:\n{0}\n".format(command) +
-                      "Returned error code {0} and error message\n{1}".
-                      format(error.errno, error.strerror))
-        result_q.put(False)
+                      "* returncode: {0}\n".format(result.returncode) +
+                      "* error message {0}\n".format(result.stderrdata))
+    result_q.put(result)
 # pylint: enable=too-few-public-methods

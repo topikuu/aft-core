@@ -1,4 +1,4 @@
-# Copyright (c) 2013-14 Intel, Inc.
+# Copyright (c) 2013, 2014, 2015 Intel, Inc.
 # Author Antti Kervinen <antti.kervinen@intel.com>
 # Rearranged by igor.stoppa@intel.com
 #
@@ -19,6 +19,7 @@ Class representing a Test Case.
 import os
 import re
 import datetime
+import logging
 
 VERSION = "0.1.0"
 
@@ -114,11 +115,28 @@ class TestCase(dict):
         the regex that identifies a succesfull run.
         """
         self["result"] = False
-        if isinstance(self["output"], basestring):
-            for line in self["output"].splitlines():
+        logging.info("self['output'] {0}".format(self["output"]))
+        if self["output"] is None or self["output"].returncode is not 0:
+            logging.info("Test Failed: returncode {0}"
+                         .format(self["output"].returncode))
+            if self["output"] is not None:
+              logging.info("stdout:\n{0}".format(self["output"].stdoutdata))
+              logging.info("stderr:\n{0}".format(self["output"].stderrdata))
+        elif self["pass_regex"] is "":
+            logging.info("Test passed: returncode 0, no pass_regex")
+            self["result"] = True
+        else:
+            for line in self["output"].stdoutdata.splitlines():
                 if re.match(self["pass_regex"], line) is not None:
+                    logging.info("Test passed: returncode 0 "
+                                 "Matching pass_regex {0}"
+                                 .format(self["pass_regex"]))
                     self["result"] = True
                     break
+            else:
+                 logging.info("Test failed: returncode 0\n"
+                              "But could not find matching pass_regex {0}"
+                              .format(self["pass_regex"]))
         return self["result"]
 
     def execute(self, device):
@@ -128,9 +146,11 @@ class TestCase(dict):
         """
         self["device"] = device
         self["start_time"] = datetime.datetime.now()
+        logging.info("Test Start Time: {0}".format(self["start_time"]))
         self._prepare()
         getattr(self, self["test"])()
         self["duration"] = datetime.datetime.now() - self["start_time"]
+        logging.info("Test Duration: {0}".format(self["duration"]))
         self._build_xunit_section()
         return True
 

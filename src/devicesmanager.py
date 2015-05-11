@@ -160,14 +160,22 @@ class DevicesManager(object):
         Loads the topology descriptor and reserves a device
         of the appropriate type and model, if available.
         """
-        return cls._success and \
-            cls._topology_class.reserve()
+        if not cls._success:
+            logging.debug("Success already compromised:"
+                          " not reserving a device.")
+        elif not cls._topology_class.reserve():
+            logging.critical("Failed to reserve a device")
+        else:
+            return True
+        cls._success = False
+        return False
 
     @classmethod
     def _write_image(cls):
         """
         Writes the image to the reserved device.
         """
+        logging.info("Writing image to the test device.")
         if not cls._success:
             logging.critical("Success already compromised:"
                              " not attempting to write image.")
@@ -185,15 +193,26 @@ class DevicesManager(object):
         """
         Runs tests on the device
         """
-        return cls._success and \
-            cls._topology_class.reserved_device and \
-            cls._topology_class.reserved_device.test()
+        logging.info("Testing the image written on the device.")
+        if not cls._success:
+            logging.critical("Success already compromised:"
+                             " not attempting to test image.")
+        elif not cls._topology_class.reserved_device:
+            logging.critical("No device was reserved: aborting image test.")
+        elif not cls._topology_class.reserved_device.test():
+            logging.critical("Failed to test image.")
+        else:
+            return True
+        cls._success = False
+        return False
+
 
     @classmethod
     def _validate(cls):
         """
         Grabs a compatible device, writes to it the image and tests it.
         """
+        logging.info("Validating the image.")
         if not cls._success:
             logging.critical("Success already compromised:"
                              " not attempting to validate image.")

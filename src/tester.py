@@ -1,4 +1,4 @@
-# Copyright (c) 2013-14 Intel, Inc.
+# Copyright (c) 2013, 2014, 2015 Intel, Inc.
 # Author igor.stoppa@intel.com
 # Based on original code from Antti Kervinen <antti.kervinen@intel.com>
 #
@@ -20,6 +20,7 @@ import os
 import time
 import ConfigParser
 import logging
+
 from aft.classloader import ClassLoader
 
 VERSION = "0.1.0"
@@ -96,13 +97,23 @@ class Tester(object):
         """
         Execute the test plan.
         """
+        logging.info("Executing the Test Plan")
         if len(cls._test_plan) == 0:
-            logging.warn("Executing the test plan: no test cases available.")
-            return False
-        cls._start_time = time.time()
-        for test_case in cls._test_plan:
-            test_case.execute(device=device)
-        cls._end_time = time.time()
+            logging.warn("No test cases available.")
+        else:
+            test_cases_number = len(cls._test_plan)
+            logging.info("Test cases available: {0}"
+                         .format(test_cases_number))
+            cls._start_time = time.time()
+            logging.info("Start time: {0}".format(cls._start_time))
+            counter = 0
+            for test_case in cls._test_plan:
+                counter = counter + 1
+                logging.info("Executing test case {0} of {1}"
+                             .format(counter, test_cases_number))
+                test_case.execute(device=device)
+            cls._end_time = time.time()
+            logging.info("End time: {0}".format(cls._end_time))
         return True
 
     @classmethod
@@ -131,19 +142,27 @@ class Tester(object):
         """
         Store the test results.
         """
+        logging.info("Storing the test results.")
         cls._results_to_xunit()
         results_filename = os.path.join(cls._test_plan[0]["test_dir"],
                                         "..", "results.xml")
         with open(results_filename, "w") as results:
             results.write(cls._xunit_results)
         logging.info("Results saved to {0}.".format(results_filename))
-
         return True
 
     @classmethod
     def test(cls, device):
-        """Run specific test cases and save the results."""
-        return cls._execute_test_plan(device=device) and\
-            cls._save_test_results()
+        """
+        Run specific test cases and save the results.
+        """
+        if not cls._execute_test_plan(device=device):
+            logging.critical("Failed to execute the test plan.")
+        elif not cls._save_test_results():
+            logging.critical("Failed to save the test plan.")
+        else:
+            logging.info("Test completed.")
+            return True
+        return False
 
 # pylint: enable=too-few-public-methods
