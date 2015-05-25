@@ -1,0 +1,34 @@
+Building and Installing
+=======================
+
+Home Page
+---------
+The project is hosted on the website of the Intel Open Source Technology
+Center, 01.org :  http://01.org/AFT
+Note: this package is not intended to be installed directly, rather it
+should be pulled in as dependency from other components.
+
+
+Premise
+-------
+The SW has been tested with OpenSUSE 13.2 64 bits.
+Other distros should work equally well, since the code is 100% python, but
+they are not confirmed.
+For example, some issues might arise with the packaging, when using Other
+distros still based on rpms, because they might have different naming and/or
+breakdown of the dependency.
+
+
+Configuring and installing from rpm repository
+----------------------------------------------
+To use the ready-made packages, add and enable the rpm repo:
+[XXX placeholder to download area from 01.org]
+
+
+Installing from sources
+-----------------------
+For the latest version of the SW, check the proejct page on github:
+https://github.com/01org-AutomatedFlasherTester/aft-core
+For creating (s)rpms packages, please refer to [XXX placeholder]
+Alternatively, on non-rpm distros, it is possible to install by using directly
+the setup.py file in the root directory of the repo.
